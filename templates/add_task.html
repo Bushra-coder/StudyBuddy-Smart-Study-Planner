@@ -1,0 +1,91 @@
+<!doctype html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+
+  <title>StudyBuddy | Add Study Task</title>
+
+  <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}" />
+</head>
+
+<body>
+  <div class="auth-container">
+    <div class="auth-card">
+      <h1>Add Study Task</h1>
+
+      <p>Create a new task for your study plan.</p>
+
+      <form action="{{ url_for('add_task') }}" method="POST">
+        <!-- Subject -->
+        <div class="form-group">
+          <label for="subject">Subject</label>
+
+          <input type="text" id="subject" name="subject" placeholder="e.g. JavaScript" required />
+        </div>
+        <!-- Study Date -->
+        <div class="form-group">
+          <label for="task_date">Study Date</label>
+
+          <input type="date" id="task_date" name="task_date" required />
+        </div>
+        <!-- Topic -->
+        <div class="form-group">
+          <label for="topic">Topic</label>
+
+          <input type="text" id="topic" name="topic" placeholder="e.g. Functions" required />
+        </div>
+
+        <!-- Priority -->
+        <div class="form-group">
+          <label for="priority">Priority</label>
+
+          <select id="priority" name="priority" required>
+            <option value="High">High</option>
+            <option value="Medium">Medium</option>
+            <option value="Low">Low</option>
+          </select>
+        </div>
+
+        <!-- Start Time -->
+        <div class="form-group">
+          <label for="start_time">Start Time</label>
+
+          <input type="time" id="start_time" name="start_time" required />
+        </div>
+
+        <!-- End Time -->
+        <div class="form-group">
+          <label for="end_time">End Time</label>
+
+          <input type="time" id="end_time" name="end_time" required />
+        </div>
+        <!-- Reminder Time -->
+        <div class="form-group">
+          <label for="reminder_time">Reminder Time</label>
+
+          <input type="time" id="reminder_time" name="reminder_time" />
+        </div>
+        <!-- Plan Type -->
+        <div class="form-group">
+          <label for="plan_type">Plan Type</label>
+
+          <select id="plan_type" name="plan_type" required>
+            <option value="Daily">Daily</option>
+            <option value="Weekly">Weekly</option>
+            <option value="Monthly">Monthly</option>
+          </select>
+        </div>
+
+        <button type="submit" class="auth-btn">Add Task</button>
+      </form>
+
+      <p class="auth-link">
+        <a href="{{ url_for('home') }}">Back to Dashboard</a>
+      </p>
+    </div>
+  </div>
+</body>
+
+</html>

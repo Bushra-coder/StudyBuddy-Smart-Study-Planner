@@ -1,0 +1,673 @@
+<!doctype html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>StudyBuddy | Dashboard</title>
+
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
+
+    <!-- css file -->
+    <link rel="stylesheet" href="{{url_for('static', filename='style.css')}}" />
+</head>
+
+<body>
+    <!-- main container for entire dashboard -->
+    <div class="dashboard">
+        <!-- left sidebar navigation -->
+        <aside class="sidebar">
+            <div class="logo">
+                <h2>StudyBuddy</h2>
+                <p>Smart Study Planner</p>
+            </div>
+
+            <nav class="navigation">
+                <a href="#" class="nav-link active"> Dashboard </a>
+
+                <a href="{{ url_for('study_plans') }}">Study Plans</a>
+                <a href="{{ url_for('notes') }}">My Notes</a>
+                <a href="#progress" class="nav-link"> Progress </a>
+                <a href="#reminders" class="nav-link"> Reminders </a>
+                <a href="{{ url_for('profile') }}">Profile</a>
+                <a href="{{ url_for('logout') }}">Logout</a>
+                {% if session.get('role') == 'admin' %}
+                <a href="{{ url_for('admin_dashboard') }}">Admin Dashboard</a>
+                {% endif %}
+            </nav>
+        </aside>
+        <!-- main dashboard content -->
+        <main class="main-content">
+            <!-- dashboard header -->
+            <header class="dashboard-header">
+                <!-- Top Bar -->
+                <div class="header-top">
+
+                    <!-- Search and Filters -->
+                    <div class="search-filter-bar">
+
+                        <form class="search-box" action="{{ url_for('study_plans') }}" method="GET">
+
+                            <input type="search" name="subject" placeholder="Search by subject..."
+                                value="{{ subject or '' }}">
+
+                            <button type="submit" class="search-submit" aria-label="Search subjects">
+                                <i class="fas fa-search"></i>
+                            </button>
+
+                        </form>
+                        <select id="headerSubjectFilter">
+                            <option value="">All Subjects</option>
+                            <option value="Python">Python</option>
+                            <option value="C++">C++</option>
+                            <option value="JavaScript">JavaScript</option>
+                        </select>
+
+
+                    </div>
+                    <!-- studnet profile -->
+
+                    <!-- Student Profile Dropdown -->
+                    <details class="profile-dropdown">
+
+                        <summary class="profile-trigger">
+                            <div class="profile-avatar">
+                                {{ (full_name or 'Student')[0]|upper }}
+                            </div>
+                        </summary>
+
+                        <div class="profile-menu">
+
+                            <!-- Student Information -->
+                            <div class="profile-menu-header">
+                                <div class="profile-avatar">
+                                    {{ (session.get('user_email') or 'S')[0]|upper }}
+                                </div>
+
+                                <div class="profile-info">
+                                    <span class="profile-name">
+                                        {{ full_name|title if full_name else 'Student' }}
+                                    </span>
+                                    <span class="profile-email">
+                                        {{ session.get('user_email', 'No email') }}
+                                    </span>
+                                </div>
+                            </div>
+
+                            <div class="profile-menu-divider"></div>
+
+                            <!-- Account Options -->
+                            <div class="profile-menu-item"> My Profile</div>
+                            <div class="profile-menu-item"> Change Password</div>
+                            <div class="profile-menu-item"> Account Settings</div>
+
+                            <div class="profile-menu-divider"></div>
+
+                            <div class="profile-menu-item logout-item">↪ Logout</div>
+
+                        </div>
+
+                    </details>
+
+                </div>
+                <!-- Welcom Section -->
+                <div class="welcome">
+                    <span class="welcome-label">YOUR PERSONAL STUDY SPACE</span>
+                    <h1>Welcome back, Student!</h1>
+                    <p>Here's an overview of your study activities.</p>
+                </div>
+
+            </header>
+            <!-- Overview cards -->
+            <section class="overview-cards">
+                <!-- Total Tasks -->
+                <div class="stat-card">
+                    <div class="stat-info">
+                        <div class="stat-icon">
+                            <i class="fa-solid fa-book-open"></i>
+                        </div>
+                        <h3>Total Tasks</h3>
+                        <p class="stat-number">{{ total_tasks }}</p>
+                        <!-- if py sends total-task-9 the browser effectively receive as p class limit=9 -->
+                    </div>
+                </div>
+
+                <!-- Completed -->
+                <div class="stat-card">
+                    <div class="stat-info">
+                        <div class="stat-icon">
+                            <i class="fa-solid fa-check"></i>
+                        </div>
+                        <h3>Completed</h3>
+                        <p class="stat-number">{{ completed_tasks }}</p>
+                    </div>
+                </div>
+
+                <!-- Pending -->
+                <div class="stat-card">
+                    <div class="stat-info">
+                        <div class="stat-icon">
+                            <i class="fa-regular fa-clock"></i>
+                        </div>
+                        <h3>Pending</h3>
+                        <p class="stat-number">{{ total_tasks - completed_tasks }}</p>
+                    </div>
+                </div>
+
+                <!-- Study Hours -->
+                <div class="stat-card">
+                    <div class="stat-info">
+                        <div class="stat-icon">
+                            <i class="fa-solid fa-hourglass-half"></i>
+                        </div>
+                        <h3>Daily Study Hours</h3>
+                        <p class="stat-number">{{ today_study_hours }}h</p>
+                    </div>
+                </div>
+            </section>
+            <!-- Today's study tasks -->
+            <div class="tasks-calendar-layout">
+
+                <section class="tasks-section">
+
+                    <div class="section-header">
+                        <div>
+                            <h2>Today's Study Tasks</h2>
+                            <p>Stay focused and complete your planned activities.</p>
+                        </div>
+
+                        <a href="{{ url_for('add_task') }}" class="add-task-btn">
+                            + Add Task
+                        </a>
+                    </div>
+
+                    <div class="task-list">
+                        {% for task in today_tasks %}
+
+                        <div class="task-card">
+
+                            <div class="task-details">
+                                <h3>{{ task["subject"] }}</h3>
+                                <p>{{ task["topic"] }}</p>
+                            </div>
+
+                            <div class="task-time">
+                                <div class="task-date">
+                                    {{ task['task_date'] or 'Date not set' }}
+                                </div>
+
+                                <span>{{ task["start_time"] }}</span>
+                                <small>{{ task["end_time"] }}</small>
+
+                                {% if task["reminder_time"] %}
+                                <small>Reminder: {{ task["reminder_time"] }}</small>
+                                {% endif %}
+                            </div>
+
+                            <div class="task-priority {{ task['priority']|lower }}">
+                                {{ task["priority"] }}
+                            </div>
+
+                            <div class="task-status">
+                                {% if task["completed"] == 0 %}
+                                <a href="{{ url_for('complete_task', task_id=task['id']) }}"
+                                    class="complete-btn">Complete</a>
+                                {% else %}
+                                <span>Completed ✓</span>
+                                {% endif %}
+
+                                <a href="{{ url_for('edit_task', task_id=task['id']) }}" class="edit-btn">Edit</a>
+
+                                <a href="{{ url_for('delete_task', task_id=task['id']) }}" class="delete-btn">Delete</a>
+                            </div>
+
+                        </div>
+
+                        {% endfor %}
+                    </div>
+                </section>
+
+
+                <!-- Weekly Study Tasks -->
+                <section class="tasks-section weekly-tasks-section">
+
+                    <div class="section-header">
+                        <div>
+                            <h2>Weekly Study Tasks</h2>
+                            <p>All your planned activities for this week.</p>
+                        </div>
+
+                        {% if weekly_tasks|length > 2 %}
+                        <button type="button" class="weekly-toggle-btn" onclick="toggleWeeklyTasks(this)">
+                            View All Tasks
+                        </button>
+                        {% endif %}
+                    </div>
+
+                    <div class="task-list">
+
+                        {% for task in weekly_tasks %}
+
+                        <div class="task-card">
+
+                            <div class="task-details">
+                                <h3>{{ task["subject"] }}</h3>
+                                <p>{{ task["topic"] }}</p>
+                            </div>
+
+                            <div class="task-time">
+                                <div class="task-date">
+                                    {{ task["task_date"] }}
+                                </div>
+                                <span>{{ task["start_time"] }}</span>
+                                <small>{{ task["end_time"] }}</small>
+                            </div>
+
+                            <div class="task-priority {{ task['priority']|lower }}">
+                                {{ task["priority"] }}
+                            </div>
+
+                            <div class="task-status">
+                                {% if task["completed"] == 0 %}
+                                <span>Pending</span>
+                                {% else %}
+                                <span>Completed ✓</span>
+                                {% endif %}
+
+                                <a href="{{ url_for('edit_task', task_id=task['id']) }}" class="edit-btn">Edit</a>
+
+                                <a href="{{ url_for('delete_task', task_id=task['id']) }}" class="delete-btn">Delete</a>
+                            </div>
+
+                        </div>
+
+                        {% else %}
+                        <p>No study tasks scheduled for this week.</p>
+                        {% endfor %}
+
+                    </div>
+
+                </section>
+
+
+
+
+                <!-- Calendar and Motivation Column -->
+                <div class="calendar-column">
+
+                    <!-- Monthly Calendar -->
+                    <aside class="calendar-panel">
+
+                        <div class="calendar-header">
+                            <h3 id="calendar-month"></h3>
+
+                            <div class="calendar-navigation">
+                                <button type="button" id="prev-month">&lt;</button>
+                                <button type="button" id="next-month">&gt;</button>
+                            </div>
+                        </div>
+
+                        <div class="calendar-weekdays">
+                            <span>Mon</span>
+                            <span>Tue</span>
+                            <span>Wed</span>
+                            <span>Thu</span>
+                            <span>Fri</span>
+                            <span>Sat</span>
+                            <span>Sun</span>
+                        </div>
+
+                        <div class="calendar-days" id="calendar-days"></div>
+
+                    </aside>
+
+                    <!-- Daily Motivation Card -->
+                    <div class="motivation-card">
+                        <div class="motivation-icon">
+                            <i class="fas fa-lightbulb"></i>
+                        </div>
+
+                        <div class="motivation-content">
+                            <span class="motivation-label">DAILY REMINDER</span>
+                            <h4 id="daily-quote">Small steps lead to big results.</h4>
+                            <p id="daily-message">Stay consistent. Your hard work will pay off.</p>
+                        </div>
+
+                    </div>
+
+                </div>
+            </div>
+
+            <!-- Deadlines and reminders -->
+            <section class="dashboard-grid">
+
+                <!-- Upcoming deadlines -->
+                <div class="dashboard-panel deadlines-panel">
+
+                    <div class="panel-header">
+                        <div>
+                            <h3>Upcoming Deadlines</h3>
+                            <p>Keep track of your upcoming academic deadlines.</p>
+                        </div>
+                    </div>
+
+                    <!-- Dynamic deadlines go here -->
+                    <div class="deadline-list">
+
+                        {% for deadline in upcoming_deadlines %}
+                        <div class="deadline-item">
+                            <div class="deadline-info">
+                                <h3>{{ deadline['subject'] }}</h3>
+                                <p>{{ deadline['topic'] }}</p>
+                            </div>
+
+                            <div class="deadline-date">
+                                <span>{{ deadline['task_date'] }}</span>
+                                <small>{{ deadline['end_time'] }}</small>
+                            </div>
+                        </div>
+
+                        {% else %}
+                        <div class="deadline-item">
+                            <div class="deadline-info">
+                                <h3>No upcoming deadlines</h3>
+                                <p>You're all caught up!</p>
+                            </div>
+                        </div>
+                        {% endfor %}
+
+                    </div>
+                </div>
+
+
+                <!-- Reminders -->
+                <div class="dashboard-panel reminders-panel" id="reminders">
+
+                    <div class="panel-header">
+                        <div>
+                            <h2>Reminders</h2>
+                            <p>Your upcoming study reminders.</p>
+                        </div>
+
+                        <a href="{{ url_for('add_task') }}" class="add-reminder-btn">
+                            + Add
+                        </a>
+                    </div>
+
+
+                    <div class="reminder-list">
+
+                        {% for task in tasks %}
+
+                        {% if task["reminder_time"] %}
+
+                        <div class="reminder-item">
+
+                            <div class="reminder-info">
+                                <h3>{{ task["subject"] }}</h3>
+                                <p>Reminder at {{ task["reminder_time"] }}</p>
+                            </div>
+
+                            <span class="reminder-status">
+                                Active
+                            </span>
+
+                        </div>
+
+                        {% endif %}
+
+                        {% endfor %}
+
+                    </div>
+
+                </div>
+
+            </section>
+            <!-- Progress and analytics -->
+            <section class="progress-section" id="progress">
+                <div class="section-header">
+                    <div>
+                        <h2>Study Progress</h2>
+                        <p>Track your productivity and study performance.</p>
+                    </div>
+                </div>
+
+                <div class="progress-grid">
+                    <!-- Completion progress -->
+                    <div class="dashboard-panel completion-panel">
+                        <div class="panel-header">
+                            <div>
+                                <h3>Task Completion</h3>
+                                <p>Overall completed tasks</p>
+                            </div>
+                        </div>
+
+                        <div class="completion-content">
+                            <div class="progress-circle">
+                                <span>{{ completion_percentage }}%</span>
+                            </div>
+
+                            <div class="completion-details">
+                                <p><strong>{{ completed_tasks }}</strong> completed</p>
+
+                                <p><strong>{{ total_tasks - completed_tasks }}</strong> pending</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Study hours -->
+                    <div class="dashboard-panel study-hours-panel">
+                        <div class="panel-header">
+                            <div>
+                                <h3>Study Hours</h3>
+                                <p>This week's study time</p>
+                            </div>
+                        </div>
+
+                        <div class="study-hours">
+                            <div class="hours-number">
+                                <span>{{ weekly_study_hours }}</span>
+                                <small>hours</small>
+                            </div>
+
+                            <p>Total study hours this week</p>
+                        </div>
+                    </div>
+
+                    <!-- Analytics chart -->
+                    <div class="dashboard-panel chart-panel">
+                        <div class="panel-header">
+                            <div>
+                                <h3>Weekly Study Activity</h3>
+                                <p>Study hours per day</p>
+                            </div>
+                        </div>
+
+                        <!-- Matplotlib chart will appear here -->
+                        <div class="chart-container">
+                            <img src="{{ url_for('static', filename='charts/' + chart_filename) }}"
+                                alt="Weekly Study Hours Chart" />
+                        </div>
+                    </div>
+                </div>
+            </section>
+        </main>
+    </div>
+
+    <!-- javascript for calendar -->
+
+    <script>
+        const calendarMonth = document.getElementById("calendar-month");
+        const calendarDays = document.getElementById("calendar-days");
+
+        let currentDate = new Date();
+        let displayedMonth = currentDate.getMonth();
+        let displayedYear = currentDate.getFullYear();
+
+        function renderCalendar() {
+
+            const firstDay = new Date(displayedYear, displayedMonth, 1);
+            const lastDay = new Date(displayedYear, displayedMonth + 1, 0);
+
+            const startingDay = (firstDay.getDay() + 6) % 7;
+            const totalDays = lastDay.getDate();
+
+            const previousMonthDays = new Date(
+                displayedYear, displayedMonth, 0
+            ).getDate();
+
+            calendarMonth.textContent = firstDay.toLocaleDateString(
+                "en-US",
+                { month: "long", year: "numeric" }
+            );
+
+            calendarDays.innerHTML = "";
+
+            for (let i = 0; i < 42; i++) {
+
+                const dayElement = document.createElement("span");
+                dayElement.classList.add("calendar-day");
+
+                let dayNumber;
+
+                if (i < startingDay) {
+                    dayNumber = previousMonthDays - startingDay + i + 1;
+                    dayElement.classList.add("other-month");
+
+                } else if (i >= startingDay + totalDays) {
+                    dayNumber = i - startingDay - totalDays + 1;
+                    dayElement.classList.add("other-month");
+
+                } else {
+                    dayNumber = i - startingDay + 1;
+
+                    if (
+                        dayNumber === currentDate.getDate() &&
+                        displayedMonth === currentDate.getMonth() &&
+                        displayedYear === currentDate.getFullYear()
+                    ) {
+                        dayElement.classList.add("today");
+                    }
+                }
+
+                dayElement.textContent = dayNumber;
+                calendarDays.appendChild(dayElement);
+            }
+        }
+
+        document.getElementById("prev-month").addEventListener("click", function () {
+            displayedMonth--;
+
+            if (displayedMonth < 0) {
+                displayedMonth = 11;
+                displayedYear--;
+            }
+
+            renderCalendar();
+        });
+
+        document.getElementById("next-month").addEventListener("click", function () {
+            displayedMonth++;
+
+            if (displayedMonth > 11) {
+                displayedMonth = 0;
+                displayedYear++;
+            }
+
+            renderCalendar();
+        });
+
+        renderCalendar();
+
+
+        // search bar subjects 
+        document.getElementById("headerSubjectFilter").addEventListener("change", function () {
+            const subject = this.value;
+
+            const url = new URL("{{ url_for('study_plans') }}", window.location.origin);
+
+            if (subject) {
+                url.searchParams.set("subject", subject);
+            }
+
+            window.location.href = url;
+        });
+
+
+
+        //    toogle for expande button weekly card
+        function toggleWeeklyTasks(button) {
+            const section = button.closest(".weekly-tasks-section");
+
+            section.classList.toggle("expanded");
+
+            if (section.classList.contains("expanded")) {
+                button.textContent = "Show Less";
+            } else {
+                button.textContent = "View All Tasks";
+            }
+        }
+
+
+
+        // daily motivation for motivaiton card
+        const dailyMotivations = [
+            {
+                quote: "You don't have to be perfect. Just keep showing up.",
+                message: "Every small effort is building the person you want to become."
+            },
+            {
+                quote: "Discipline will take you where motivation cannot.",
+                message: "Keep your promises to yourself, even on difficult days."
+            },
+            {
+                quote: "Trust the timing of your growth.",
+                message: "Some beautiful things take patience and consistent effort."
+            },
+            {
+                quote: "Your only competition is who you were yesterday.",
+                message: "Focus on becoming a little better every single day."
+            },
+            {
+                quote: "Dreams need dedication, not just imagination.",
+                message: "Turn one small plan into action today."
+            },
+            {
+                quote: "You are capable of more than you think.",
+                message: "Believe in yourself and give your best effort."
+            },
+            {
+                quote: "Slow progress is still progress.",
+                message: "Don't rush your journey. Keep moving forward."
+            },
+            {
+                quote: "Make yourself proud, one day at a time.",
+                message: "Your future is shaped by the choices you make today."
+            },
+            {
+                quote: "Consistency creates results that talent alone cannot.",
+                message: "Show up, practise, learn and keep improving."
+            },
+            {
+                quote: "A focused mind can achieve beautiful things.",
+                message: "Give your attention to what truly matters."
+            }
+        ];
+
+        const today = new Date();
+        const startOfYear = new Date(today.getFullYear(), 0, 0);
+        const dayNumber = Math.floor((today - startOfYear) / 86400000);
+
+        const motivation = dailyMotivations[
+            dayNumber % dailyMotivations.length
+        ];
+
+        document.getElementById("daily-quote").textContent = motivation.quote;
+        document.getElementById("daily-message").textContent = motivation.message;
+
+
+    </script>
+
+</body>
+
+</html>

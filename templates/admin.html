@@ -1,0 +1,98 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin Dashboard | StudyBuddy</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+
+<body>
+
+    <div class="dashboard admin-dashboard">
+
+        <aside class="sidebar">
+            <div class="logo">
+                <h2>StudyBuddy</h2>
+                <p>Admin Panel</p>
+            </div>
+
+            <nav class="navigation">
+                <a href="{{ url_for('admin_dashboard') }}" class="active">Admin Dashboard</a>
+                <a href="{{ url_for('home') }}">Student Dashboard</a>
+                <a href="{{ url_for('logout') }}">Logout</a>
+            </nav>
+        </aside>
+
+        <main class="main-content">
+
+            <div class="dashboard-header">
+                <div class="welcome">
+                    <h1>Admin Dashboard</h1>
+                    <p>Monitor students and overall system activity.</p>
+                </div>
+            </div>
+
+            <div class="stats-container">
+
+                <div class="stat-card">
+                    <h3>Total Students</h3>
+                    <h2>{{ total_users }}</h2>
+                </div>
+
+                <div class="stat-card">
+                    <h3>Total Study Tasks</h3>
+                    <h2>{{ total_tasks }}</h2>
+                </div>
+
+                <div class="stat-card">
+                    <h3>Completed Tasks</h3>
+                    <h2>{{ completed_tasks }}</h2>
+                </div>
+
+                <div class="stat-card">
+                    <h3>Pending Tasks</h3>
+                    <h2>{{ pending_tasks }}</h2>
+                </div>
+
+            </div>
+
+            <div class="dashboard-panel">
+                <h2>Registered Users</h2>
+
+                <div class="table-responsive">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>ID</th>
+                                <th>Full Name</th>
+                                <th>Email</th>
+                                <th>Study Tasks</th>
+                            </tr>
+                        </thead>
+
+                        <tbody>
+                            {% for user in users %}
+                            <tr>
+                                <td>{{ user['id'] }}</td>
+                                <td>{{ user['full_name'] or 'N/A' }}</td>
+                                <td>{{ user['email'] }}</td>
+                                <td>{{ user['task_count'] }}</td>
+                            </tr>
+                            {% else %}
+                            <tr>
+                                <td colspan="4">No registered users found.</td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+        </main>
+    </div>
+
+</body>
+
+</html>
