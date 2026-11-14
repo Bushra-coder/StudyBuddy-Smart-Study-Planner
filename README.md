@@ -30,21 +30,21 @@ StudyBuddy is a web-based study planner designed to help students organize their
 
 1. Clone the repository:
 
-```bash
+
 git clone https://github.com/Bushra-coder/StudyBuddy-Smart-Study-Planner.git
-```
+
 
 2. Open the project folder:
 
 
 cd StudyBuddy-Smart-Study-Planner
-```
+
 
 3. Create a virtual environment:
 
-```bash
+
 python -m venv venv
-```
+
 
 4. Activate the virtual environment on Windows:
 
