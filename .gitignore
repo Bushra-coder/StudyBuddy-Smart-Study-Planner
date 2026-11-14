@@ -218,3 +218,8 @@ __marimo__/
 
 # Streamlit
 .streamlit/secrets.toml
+# StudyBuddy local database files
+*.db
+*.sqlite
+*.sqlite3
+*.db-journal
